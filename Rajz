@@ -301,4 +301,25 @@ public class Point
 public class DrawingContext : DbContext
 {
     public DbSet<Drawing> Drawings { get; set; }
-    public DbSet<Point> Points {
+    public DbSet<Point> Points { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlite("Data Source=drawings.db");
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Drawing>()
+            .HasKey(d => d.Id);
+
+        modelBuilder.Entity<Point>()
+            .HasKey(p => p.Id);
+
+        modelBuilder.Entity<Drawing>()
+            .HasMany(d => d.Points)
+            .WithOne()
+            .HasForeignKey(p => p.DrawingId) // Establish foreign key relationship
+            .OnDelete(DeleteBehavior.Cascade); // Cascade delete points when a drawing is deleted
+    }
+}
